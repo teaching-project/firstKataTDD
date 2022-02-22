@@ -1,25 +1,34 @@
 package com.mydigitalschool.kata
 
-fun stringCalculator(input: String): Int {
-    if (input == "") {
-        return 0
+class StringCalculator(val input: String, val delimiters: MutableList<String> = mutableListOf()) {
+
+    init {
     }
-    var customInput = input
-    val listDelimiter = mutableListOf(",", "\n")
-    val customDelimiter = getDelimiter(customInput)
-    if (customDelimiter != null) {
-        listDelimiter.add(customDelimiter)
-        if(customDelimiter.length > 1){
-        customInput = input.drop(customDelimiter.length + 2)
-        } else {
-            customInput = customInput.removePrefix(customDelimiter)
+
+    fun compute(input: String): Int {
+        if (input == "") {
+            return 0
         }
+        var customInput = input
+        val listDelimiter = mutableListOf(",", "\n")
+        val customDelimiter = getDelimiter(customInput)
+        if (customDelimiter != null) {
+            listDelimiter.add(customDelimiter)
+            customInput = if(customDelimiter.length > 1){
+                input.drop(customDelimiter.length + 2)
+            } else {
+                customInput.removePrefix(customDelimiter)
+            }
+        }
+        if (customInput.split(*listDelimiter.toTypedArray()).size >= 2) {
+            return stringSplitter(customInput, listDelimiter)
+        }
+        return customInput.toInt()
     }
-    if (customInput.split(*listDelimiter.toTypedArray()).size >= 2) {
-        return stringSplitter(customInput, listDelimiter)
-    }
-    return customInput.toInt()
+
 }
+
+fun stringCalculator(input: String): Int = StringCalculator(input).compute(input)
 
 private fun stringSplitter(input: String, delimiters: MutableList<String>): Int {
     val inputSplit = input.split(*delimiters.toTypedArray())
@@ -36,19 +45,18 @@ private fun stringSplitter(input: String, delimiters: MutableList<String>): Int 
         .sumOf { it }
 }
 
-private fun getDelimiter(input: String, delimiters: MutableList<String> = mutableListOf()): List<String> {
+private fun getDelimiter(input: String, delimiters: MutableList<String> = mutableListOf()): String? {
     val firstChar = input.first()
     //guard
     if (firstChar.isDigit() || firstChar == '-') {
-        return delimiters
+        return null
     }
-    if(firstChar == '['){
-        delimiters.add(input.substring(1, input.indexOf(']')))
-        return getDelimiter(input,delimiters)
+    return if(firstChar == '['){
+        input.substring(1, input.indexOf(']'))
     }
     else if (!firstChar.isDigit() && firstChar != '-') {
-         return firstChar.toString()
+        firstChar.toString()
     } else {
-        return null
-     }
+        null
+    }
 }
